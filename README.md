@@ -9,31 +9,43 @@ to compile paragait and all the dependencies.
 
 ## Download the code
 
-  ```git clone https://github.com/UoMResearchIT/paragait-docker```
+  ```bash
+  git clone https://github.com/UoMResearchIT/paragait-docker
+  ```
 
 ## How-To
 
 When Docker is installed go to the previous repository:
 
-  ```cd paragait-docker```
+  ```bash
+  cd paragait-docker
+  ```
 
 build the docker image:
 
-  ```docker build -t paragait .```
+  ```bash
+  docker build -t paragait .
+  ```
 
 Start the container from the latest paragait image, give it the name paragait and log into a bash shell:
 
-  ```docker run --name paragait -i -t paragait:latest /bin/bash```
+  ```bash
+  docker run --name paragait -i -t paragait:latest /bin/bash
+  ```
   
 Run the installation script which should be in the directory:
 
-  ```./paragait.sh```
+  ```bash
+  ./paragait.sh
+  ```
 
 ## Access a container after leaving it
 
 List the available containers:
 
-  ```docker ps -a```
+  ```bash
+  docker ps -a
+  ```
 
 The list will be something like:
 
@@ -48,10 +60,13 @@ da76eeec88d7    |    a721e441a9e0    |    "/bin/bash"   |      5 days ago    |  
 
 Start the container you want to interact with:
 
-  ```docker start paragait```
+  ```bash
+  docker start paragait
+  ```
   
 and log into it:
 
-  ```docker attach paragait```
-
-
+  ```bash
+  docker attach paragait
+  ```
+  
