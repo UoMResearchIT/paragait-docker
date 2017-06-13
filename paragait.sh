@@ -51,6 +51,9 @@ if [ ! -d $WORKING_DIR ]; then
     mkdir $WORKING_DIR
 fi
 
+logfile=$WORKING_DIR/paragait.log 
+
+echo "working directory: " $WORKING_DIR >> $logfile
 cd $WORKING_DIR
 
 # Installation of system program needed and library
@@ -73,18 +76,27 @@ else
 fi
 
 # Compilation for linuxdesktop
-MACHINE=linuxdesktop ./make-parafem 2>&1 | tee parafem.log
+MACHINE=linuxdesktop ./make-parafem >> $logfile 2>&1  
 
-# Testing parafem
+# Testing parafem without and with mpi
 if [ ! -d test ]; then
  mkdir test
 fi
 
 cp examples/5th_ed/p121/demo/p121_demo.mg test/
 cd test
-../bin/p12meshgen p121_demo
-../bin/p121 p121_demo
 
+echo "Test parafem without mpi" >> $logfile
+../bin/p12meshgen p121_demo >> $logfile 2>&1
+../bin/p121 p121_demo >> $logfile 2>&1
+
+# mpi test
+echo "Test parafem with mpi" >> $logfile
+if [ "$(whoami)" == "root" ]; then
+    mpirun --allow-run-as-root ../bin/p121 p121_demo >> $logfile 2>&1
+else
+    mpirun ../bin/p121 p121_demo >> $logfile 2>&1
+fi 
 #######################################################
 # GaitSym compilation and installation from source code
 #######################################################
@@ -102,6 +114,7 @@ else
     INSTALL_DEP=/usr/local
 fi
 
+echo "Gaitsym dependencies path:" $INSTALL_DEP >> $logfile
 
 # Go back to working directory
 cd $WORKING_DIR
@@ -110,11 +123,13 @@ cd $WORKING_DIR
 
 # Compile the prerequisites
 if [ ! -f GaitSym_2015_dep.zip ]; then
-    wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_dep.zip
+    echo "Download Gaisym dependencies file" >> $logfile
+    wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_dep.zip >> $logfile 2>&1
 fi
 
 if [ ! -d GaitSym_2015_dep ]; then
-    unzip GaitSym_2015_dep.zip
+    echo "Compiling and installing dependencies" >> $logfile
+    unzip GaitSym_2015_dep.zip >> $logfile 2>&1
     cd GaitSym_2015_dep
 
     for i in $( ls ); 
@@ -122,19 +137,22 @@ if [ ! -d GaitSym_2015_dep ]; then
     done
 
     # libxml2
+    echo "Install libxml2 library." >> $logfile
     cd libxml2-2.9.1
     ./configure --prefix=$INSTALL_DEP
     make
     make install
 
     # ODE compilation. Will not work like that need to add a line in  
-
+    echo "Install ODE library modified for Gaitsym." >> $logfile
     cd ../ode-0.12-gaitsym-3.1-clean/
     ./configure --enable-double-precision CFLAGS="-msse" CXXFLAGS="-msse -fpermissive" --prefix=$INSTALL_DEP
     make
     make install
 
     # Get ANN library which is not provided
+    echo "Donwload and Install ANN library." >> $logfile
+    echo "(missing from Gaisym required dependencies file)"
     cd ..
     wget -c https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz
     tar xvf ann_1.1.2.tar.gz
@@ -144,6 +162,8 @@ if [ ! -d GaitSym_2015_dep ]; then
     mv include/ANN $INSTALL_DEP/include
 
     # Same things for GLUI
+    echo "Donwload and Install GLUI library." >> $logfile
+    echo "(missing from Gaisym required dependencies file)" >> $logfile
     cd ..
     git clone https://github.com/libglui/glui.git
     cd glui
@@ -158,21 +178,22 @@ fi
 cd $WORKING_DIR
 # Gaitsym compilation
 if [ ! -f GaitSym_2015_src.zip ]; then
+    echo "Download Gaitsym source code" >> $logfile 
     wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_src.zip
 fi
 if [ ! -d GaitSym_2015_src ]; then
     unzip GaitSym_2015_src.zip
 fi
 
+echo "Compile Gaitsym"
 cd GaitSym_2015_src
+echo "modify Gaitsym makefile" 
 cp makefile makefile.orig
-
 sed -i 's/shell uname -p/shell uname -m/' makefile
 sed -i 's/CXX      = CC/CXX      = mpic++/' makefile
 sed -i 's/CC       = cc/CC       = mpicc/' makefile
 sed -i 's/-static//' makefile
 sed -i 's/LIBS = -L"$(HOME)\/Unix\/lib" -lode -lANN -lxml2 -lpthread -lm -lz/LIBS = -L'"${INSTALL_DEP//\//\\/}"'\/lib -lode -lANN -L\/usr\/lib -lxml2 -lpthread -lm -lz -L\/usr\/lib\/openmpi/' makefile
-
 sed -i 's/INC_DIRS\ =\ -I"$(HOME)\/Unix\/include"\ -I\/usr\/include\/libxml2/INC_DIRS\ =\ -I'"${INSTALL_DEP//\//\\/}"'\/include\ -I'"${INSTALL_DEP//\//\\/}"'\/include\/GL\ -I\/usr\/include\/libxml2 -I\/usr\/local\/include\/libxml2 -I\/usr\/include\/GL/' makefile
 make
 
