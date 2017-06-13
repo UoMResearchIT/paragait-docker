@@ -9,7 +9,7 @@ to compile paragait and all the dependencies.
 
 ## Download the code
 
-git clone https://github.com/UoMResearchIT/paragait-docker
+  ```git clone https://github.com/UoMResearchIT/paragait-docker```
 
 ## How-To
 
