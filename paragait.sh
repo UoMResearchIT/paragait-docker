@@ -78,7 +78,7 @@ else
 fi
 
 # Compilation for linuxdesktop
-MACHINE=linuxdesktop ./make-parafem >> $logfile 2>&1  
+MACHINE=linuxdesktop ./make-parafem >> $logfile 2>&1  || exit 1
 
 # Testing parafem without and with mpi
 if [ ! -d test ]; then
@@ -197,7 +197,7 @@ sed -i 's/CC       = cc/CC       = mpicc/' makefile
 sed -i 's/-static//' makefile
 sed -i 's/LIBS = -L"$(HOME)\/Unix\/lib" -lode -lANN -lxml2 -lpthread -lm -lz/LIBS = -L'"${INSTALL_DEP//\//\\/}"'\/lib -lode -lANN -L\/usr\/lib -lxml2 -lpthread -lm -lz -L\/usr\/lib\/openmpi/' makefile
 sed -i 's/INC_DIRS\ =\ -I"$(HOME)\/Unix\/include"\ -I\/usr\/include\/libxml2/INC_DIRS\ =\ -I'"${INSTALL_DEP//\//\\/}"'\/include\ -I'"${INSTALL_DEP//\//\\/}"'\/include\/GL\ -I\/usr\/include\/libxml2 -I\/usr\/local\/include\/libxml2 -I\/usr\/include\/GL/' makefile
-make
+make || exit 1
 
 # Clean directory
 cd $WORKING_DIR
