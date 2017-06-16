@@ -53,7 +53,7 @@ fi
 
 logfile=$WORKING_DIR/paragait.log 
 
-echo "working directory: " $WORKING_DIR >> $logfile
+echo "working directory: " $WORKING_DIR > $logfile
 cd $WORKING_DIR
 
 # Installation of system program needed and library
@@ -68,11 +68,13 @@ cd $WORKING_DIR
 
 if [ ! -d parafem-code ]; then
     git svn clone https://svn.code.sf.net/p/parafem/code/trunk parafem-code
+    #svn co https://svn.code.sf.net/p/parafem/code/trunk parafem-code
     cd parafem-code/parafem
 else
     cd parafem-code/parafem
     git svn fetch
     git rebase git-svn
+    #svn update
 fi
 
 # Compilation for linuxdesktop
