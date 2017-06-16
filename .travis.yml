@@ -1,0 +1,36 @@
+matrix:                                                                                                                                                                           
+  include:
+    - os: linux
+      dist: trusty
+      #sudo: required
+      language: cpp
+      #addons:
+      #  apt:
+      #    sources:
+      #      - ubuntu-toolchain-r-test
+      #    packages:
+      #      - g++-7
+      #      - 
+      #env:
+      #   - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6 "
+#    - os: osx
+#      osx_image: xcode8
+#      env:
+#        - MATRIX_EVAL="brew install gcc && CC=gcc-6 && CXX=g++-6"  
+
+# The default environment variables $CC and $CXX are known to interfere with MPI projects.
+before_install:
+  #- eval "${MATRIX_EVAL}"
+  - test -n $CC  && unset CC
+  - test -n $CXX && unset CXX
+
+
+script:
+    - if [ "$TRAVIS_OS_NAME" != "osx" ]; then
+        sudo apt-get update -qy;
+        sudo apt-get install -y gcc g++ gfortran libopenmpi-dev make git git-svn python-dev zlib1g-dev wget unzip mesa-common-dev freeglut3-dev;
+      fi
+    - chmod u+x paragait.sh;
+    - ./paragait.sh;
+  
+  
