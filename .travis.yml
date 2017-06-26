@@ -32,5 +32,6 @@ script:
       fi
     - chmod u+x paragait.sh parafem.sh gaitsym.sh foam-extend.sh openfpci.sh;
     - ./paragait.sh;
+    - cat paragait.log;
   
   

@@ -105,16 +105,16 @@ mkdir -p $WM_PROJECT_USER_DIR
 cd $WM_PROJECT_USER_DIR
 
 if [ ! -f Fsi_40.tar.gz ]; then
-    wget -c https://openfoamwiki.net/images/d/d6/Fsi_40.tar.gz >> $logfile 2>&1 || exit 1
+    wget -c https://openfoamwiki.net/images/d/d6/Fsi_40.tar.gz >> $logfile 2>&1  
 fi
 
 if [ ! -d FluidSolidInteraction ]; then
-    tar -xzf Fsi_40.tar.gz >> $logfile 2>&1 || exit 1
+    tar -xzf Fsi_40.tar.gz >> $logfile 2>&1  
 fi
 
 # build the Toolkit
 cd FluidSolidInteraction/src
-./Allwmake >> $logfile 2>&1 || exit 1
+./Allwmake >> $logfile 2>&1  
 
 #######################################
 # OpenFPCI compilation and installation
@@ -135,13 +135,13 @@ if [ ! -d OpenFPCI ]; then
     sed -i 's/EXE_LIBS = /EXE_LIBS = \\ \n    ..\/..\/fluidSolidInteraction\/solidSolvers\/paraFEM\/dyparafemsubroutines.o -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -lParaFEM_mpi.5.0.3  -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -larpack_linuxdesktop -lgfortran /'  $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/options
 else
     cd OpenFPCI
-    git pull >> $logfile 2>&1 || exit 1
+    git pull >> $logfile 2>&1  
 fi
 
 cd $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/solidSolvers/paraFEM
-gfortran -fcheck=all -c dyparafemsubroutines.f90 -o dyparafemsubroutines.o -I${PARAFEM_DIR}/include/mpi >> $logfile 2>&1 || exit 1
+gfortran -fcheck=all -c dyparafemsubroutines.f90 -o dyparafemsubroutines.o -I${PARAFEM_DIR}/include/mpi >> $logfile 2>&1  
 cd ../../..
-./Allwmake >> $logfile 2>&1 || exit 1
+./Allwmake >> $logfile 2>&1  
 
 
 ####################################################################

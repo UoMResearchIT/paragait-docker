@@ -95,17 +95,17 @@ cd $WORKING_DIR
 
 if [ ! -d parafem-code ]; then
     #git svn clone https://svn.code.sf.net/p/parafem/code/trunk parafem-code
-    svn co https://svn.code.sf.net/p/parafem/code/trunk parafem-code >> $logfile 2>&1 || exit 1
+    svn co https://svn.code.sf.net/p/parafem/code/trunk parafem-code >> $logfile 2>&1  
     cd parafem-code/parafem
 else
     cd parafem-code/parafem
     #git svn fetch
     #git rebase git-svn
-    svn update >> $logfile 2>&1 || exit 1
+    svn update >> $logfile 2>&1  
 fi
 
 # Compilation for linuxdesktop
-MACHINE=linuxdesktop ./make-parafem >> $logfile 2>&1  || exit 1
+MACHINE=linuxdesktop ./make-parafem >> $logfile 2>&1   
 
 # Testing parafem without and with mpi
 if [ ! -d test ]; then

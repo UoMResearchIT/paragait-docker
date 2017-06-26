@@ -71,22 +71,25 @@ fi
 # Parafem compilation and installation from source code (repository)
 ####################################################################
 
-./parafem.sh -d $WORKING_DIR -l $logfile || exit 1
+./parafem.sh -d $WORKING_DIR -l $logfile  
 
 #######################################################
 # GaitSym compilation and installation from source code
 #######################################################
 
-./gaitsym.sh -d $WORKING_DIR -l $logfile || exit 1
+./gaitsym.sh -d $WORKING_DIR -l $logfile  
 
 #######################################
 # Foam-dev Compilation and installation
 #######################################
 
-./foam-extend.sh -d $WORKING_DIR -l $logfile || exit 1
+./foam-extend.sh -d $WORKING_DIR -l $logfile  
 
 #######################################
 # OpenFPCI Compilation and installation
 #######################################
 
-./openfpci.sh -d $WORKING_DIR -l $logfile || exit 1
+./openfpci.sh -d $WORKING_DIR -l $logfile  
+
+#Print logfile for travis CI
+cat $logfile

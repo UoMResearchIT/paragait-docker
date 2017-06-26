@@ -89,52 +89,53 @@ echo "Gaitsym dependencies path:" $INSTALL_DEP >> $logfile
 
 # Compile the prerequisites
 if [ ! -f GaitSym_2015_dep.zip ]; then
-    echo "Download Gaisym dependencies file" >> $logfile
-    wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_dep.zip >> $logfile 2>&1 || exit 1
+    echo "Download Gaitsym dependencies file" >> $logfile
+    wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_dep.zip >> $logfile 2>&1  
 fi
 
 if [ ! -d GaitSym_2015_dep ]; then
     echo "Compiling and installing dependencies" >> $logfile
-    unzip GaitSym_2015_dep.zip >> $logfile 2>&1 || exit 1
+    unzip GaitSym_2015_dep.zip >> $logfile 2>&1  
     cd GaitSym_2015_dep
 
     for i in $( ls ); 
-        do tar xvf $i >> $logfile 2>&1 || exit 1; 
+        do tar xvf $i >> $logfile 2>&1  ; 
     done
 
     # libxml2
     echo "Install libxml2 library." >> $logfile
     cd libxml2-2.9.1
-    ./configure --prefix=$INSTALL_DEP >> $logfile 2>&1 || exit 1
-    make >> $logfile 2>&1 || exit 1
-    make install >> $logfile 2>&1 || exit 1
+    ./configure --prefix=$INSTALL_DEP >> $logfile 2>&1  
+    make >> $logfile 2>&1  
+    make install >> $logfile 2>&1  
 
     # ODE compilation. Will not work like that need to add a line in  
     echo "Install ODE library modified for Gaitsym." >> $logfile
     cd ../ode-0.12-gaitsym-3.1-clean/
-    ./configure --enable-double-precision CFLAGS="-msse" CXXFLAGS="-msse -fpermissive" --prefix=$INSTALL_DEP >> $logfile 2>&1 || exit 1
-    make >> $logfile 2>&1 || exit 1
-    make install >> $logfile 2>&1 || exit 1
+    ./configure --enable-double-precision CFLAGS="-msse" CXXFLAGS="-msse -fpermissive" --prefix=$INSTALL_DEP >> $logfile 2>&1  
+    make >> $logfile 2>&1  
+    make install >> $logfile 2>&1  
 
     # Get ANN library which is not provided
     echo "Donwload and Install ANN library." >> $logfile
-    echo "(missing from Gaisym required dependencies file)"
+    echo "(missing from Gaitsym required dependencies file)" >> $logfile
     cd ..
-    wget -c https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz >> $logfile 2>&1 || exit 1
-    tar xvf ann_1.1.2.tar.gz >> $logfile 2>&1 || exit 1 
+    wget -c https://www.cs.umd.edu/~mount/ANN/Files/1.1.2/ann_1.1.2.tar.gz >> $logfile 2>&1  
+    tar xvf ann_1.1.2.tar.gz >> $logfile 2>&1   
     cd ann_1.1.2
-    make linux-g++ >> $logfile 2>&1 || exit 1
-    mv lib/* $INSTALL_DEP/lib
-    mv include/ANN $INSTALL_DEP/include
+    make linux-g++ >> $logfile 2>&1  
+    mv lib/* $INSTALL_DEP/lib/
+    mkdir -p $INSTALL_DEP/include/ANN
+    mv include/ANN/* $INSTALL_DEP/include/ANN/
 
     # Same things for GLUI
     echo "Donwload and Install GLUI library." >> $logfile
-    echo "(missing from Gaisym required dependencies file)" >> $logfile
+    echo "(missing from Gaitsym required dependencies file)" >> $logfile
     cd ..
-    git clone https://github.com/libglui/glui.git >> $logfile 2>&1 || exit 1
+    git clone https://github.com/libglui/glui.git >> $logfile 2>&1  
     cd glui
-    cmake . >> $logfile 2>&1 || exit 1
-    make >> $logfile 2>&1 || exit 1
+    cmake . >> $logfile 2>&1  
+    make >> $logfile 2>&1  
     mkdir -p $INSTALL_DEP/include/GL/glui
     cp algebra3.h $INSTALL_DEP/include/GL/glui
     cp include/GL/glui.h $INSTALL_DEP/include/GL/glui
@@ -145,12 +146,12 @@ cd $WORKING_DIR
 # Gaitsym compilation
 if [ ! -f GaitSym_2015_src.zip ]; then
     echo "Download Gaitsym source code" >> $logfile 
-    wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_src.zip >> $logfile 2>&1 || exit 1
+    wget -c http://www.animalsimulation.org/software/GaitSym/GaitSym_2015_src.zip >> $logfile 2>&1  
 fi
 
 echo "Compile Gaitsym"
 if [ ! -d GaitSym_2015_src ]; then
-    unzip GaitSym_2015_src.zip >> $logfile 2>&1 || exit 1
+    unzip GaitSym_2015_src.zip >> $logfile 2>&1  
     rm -rf __MACOSX
     cd $WORKING_DIR/GaitSym_2015_src
     echo "modify Gaitsym makefile" >> $logfile
@@ -161,10 +162,10 @@ if [ ! -d GaitSym_2015_src ]; then
     sed -i 's/-static//' makefile
     sed -i 's/LIBS = -L"$(HOME)\/Unix\/lib" -lode -lANN -lxml2 -lpthread -lm -lz/LIBS = -L'"${INSTALL_DEP//\//\\/}"'\/lib -lode -lANN -L\/usr\/lib -lxml2 -lpthread -lm -lz -L\/usr\/lib\/openmpi/' makefile
     sed -i 's/INC_DIRS\ =\ -I"$(HOME)\/Unix\/include"\ -I\/usr\/include\/libxml2/INC_DIRS\ =\ -I'"${INSTALL_DEP//\//\\/}"'\/include\ -I'"${INSTALL_DEP//\//\\/}"'\/include\/GL\ -I\/usr\/include\/libxml2 -I\/usr\/local\/include\/libxml2 -I\/usr\/include\/GL/' makefile
-    make >> $logfile 2>&1 || exit 1
+    make >> $logfile 2>&1  
 else
     cd $WORKING_DIR/GaitSym_2015_src
-    make >> $logfile 2>&1 || exit 1
+    make >> $logfile 2>&1  
 fi
 
 # Clean directory

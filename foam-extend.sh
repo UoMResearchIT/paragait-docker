@@ -118,18 +118,19 @@ else
     cd foam-extend-4.0
     git pull >> $logfile 2>&1
     source etc/bashrc >> $logfile 2>&1
-    cd $HOME/foam/foam-extend-4.0
-    ./Allwmake -update <<< "y" >> $logfile 2>&1 || exit 1
+    cd $HOME/foam/foam-extend-$FOAMEXTEND_VERSION
+    ./Allwmake -update <<< "y" >> $logfile 2>&1  
 fi
 
 
 # # Test if foam-extend properly installed and working
- 
+USERNAME=`whoami`
+source $HOME/foam/foam-extend-$FOAMEXTEND_VERSION/etc/bashrc
+
 mkdir -p $FOAM_RUN
-# Shortcut to go to the RUN directory create above
-run
-# # Shortcut to go to the tutorial directory 
-tut
+mkdir -p $FOAM_TUTORIALS
+cd $FOAM_TUTORIALS
+
 # # Run all the test 
 ./Alltest >> $logfile 2>&1
 ./Allrun >> $logfile 2>&1
