@@ -28,7 +28,7 @@ before_install:
 script:
     - if [ "$TRAVIS_OS_NAME" != "osx" ]; then
         sudo apt-get update -qy;
-        sudo apt-get install -y gcc g++ gfortran libopenmpi-dev make cmake rpm flex bison gcc-4.9 g++-4.9 git git-svn subversion python-dev zlib1g-dev wget unzip mesa-common-dev freeglut3-dev;
+        sudo apt-get install -y gcc g++ gfortran libopenmpi-dev make cmake rpm flex bison git git-svn subversion python-dev zlib1g-dev wget unzip mesa-common-dev freeglut3-dev;
       fi
     - chmod u+x paragait.sh parafem.sh gaitsym.sh foam-extend.sh openfpci.sh;
     - ./paragait.sh;
