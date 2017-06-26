@@ -84,8 +84,8 @@ if [ "$(whoami)" == "root" ]; then
     rm -f /usr/bin/g++
     ln -s /usr/bin/gcc-$FSI_GCC_VERSION /usr/bin/gcc
     ln -s /usr/bin/g++-$FSI_GCC_VERSION /usr/bin/g++
-elif [[ -n $(uname -a | grep csf) ]]; then
-    module load compilers/gcc/4.9.0 mpi/gcc/openmpi/1.6
+#elif [[ -n $(uname -a | grep csf) ]]; then
+#    module load compilers/gcc/4.9.0 mpi/gcc/openmpi/1.6
 fi
 
 ############################################################

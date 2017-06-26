@@ -73,7 +73,7 @@ fi
 ##################################################################### 
 
 GCC_VERSION=4.9
-if [ ! "$(whoami)" == "root" ]; then
+if [ "$(whoami)" == "root" ]; then
     rm -f /usr/bin/gcc
     rm -f /usr/bin/g++
     #rm -f /usr/bin/gfortran
@@ -132,7 +132,7 @@ fi
 # Put back the system version of GCC 
 ####################################################################
 
-if [ ! "$(whoami)" == "root" ]; then
+if [ "$(whoami)" == "root" ]; then
     rm -f /usr/bin/gcc
     rm -f /usr/bin/g++
     #rm -f /usr/bin/gfortran
