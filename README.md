@@ -3,6 +3,10 @@
 Repository to create a docker image and the installation script
 to compile paragait and all the dependencies.
 
+## Continuous integration with Travis CI
+
+https://travis-ci.org/gruel/paragait-docker/builds
+
 ## Requirement
 
 - [Docker](https://www.docker.com/) for linux 
