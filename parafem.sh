@@ -11,7 +11,7 @@ version=$(grep "^#?"  "$0" | cut -c 4-)
 # Usage info
 show_help() {
     cat << EOF
-    Usage: ${0##*/} [ -d WORKING_DIR ] [ -V ] [ -h ]
+    Usage: ${0##*/} [ -d WORKING_DIR ] [ -l LOGFILE ] [ -V ] [ -h ]
 
        -h              display this help and exit
        -d WORKING_DIR  write the result to OUTFILE instead of standard output.
@@ -27,9 +27,9 @@ while getopts "${optspec}" opt; do
         d )
             WORKING_DIR="${OPTARG}"
             ;;
-	l )
-	    LOGFILE="${OPTARG}"
-	    ;;
+        l )
+            LOGFILE="${OPTARG}"
+            ;;
         v )
             verbose=$((verbose+1))
             ;;
@@ -38,11 +38,10 @@ while getopts "${optspec}" opt; do
             exit 1
             ;;
         h ) show_help
-	    exit;;
-        *) echo "$0: error - unrecognized option $1" 1>&2; exit 1;;
+            exit;;
+        *)  echo "$0: error - unrecognized option $1" 1>&2; exit 1;;
     esac
 done
-
 
 #Define working directory as the one where the script is executed.
 
@@ -67,22 +66,8 @@ if [ ! -f $logfile ]; then
     echo "working directory: " $WORKING_DIR > $logfile
 fi
 
-
-#####################################################################
-# Version of GCC which will work for Parafem and OpenFPCI on a Docker 
-##################################################################### 
-
-GCC_VERSION=4.9
-if [ "$(whoami)" == "root" ]; then
-    rm -f /usr/bin/gcc
-    rm -f /usr/bin/g++
-    #rm -f /usr/bin/gfortran
-    ln -s /usr/bin/gcc-4.9 /usr/bin/gcc
-    ln -s /usr/bin/g++-4.9 /usr/bin/g++
-    #ln -s /usr/bin/gfortran-4.9 /usr/bin/gfortran
-fi
-
-
+echo "Start Parafem compilation" 
+echo "Start Parafem compilation" >> $logfile
 
 ####################################################################
 # Parafem compilation and installation from source code (repository)
@@ -102,6 +87,10 @@ else
     #git svn fetch
     #git rebase git-svn
     svn update >> $logfile 2>&1  
+fi
+
+if [ -f openmpi.patch ]; then
+    patch -p0 -f < $WORKING_DIR/openmpi.patch >> $logfile 2>&1  
 fi
 
 # Compilation for linuxdesktop
@@ -125,18 +114,4 @@ if [ "$(whoami)" == "root" ]; then
     mpirun --allow-run-as-root ../bin/p121 p121_demo >> $logfile 2>&1
 else
     mpirun ../bin/p121 p121_demo >> $logfile 2>&1
-fi 
-
-
-####################################################################
-# Put back the system version of GCC 
-####################################################################
-
-if [ "$(whoami)" == "root" ]; then
-    rm -f /usr/bin/gcc
-    rm -f /usr/bin/g++
-    #rm -f /usr/bin/gfortran
-    ln -s /usr/bin/gcc-6 /usr/bin/gcc
-    ln -s /usr/bin/g++-6 /usr/bin/g++
-    #ln -s /usr/bin/gfortran-6 /usr/bin/gfortran
 fi

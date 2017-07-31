@@ -11,10 +11,11 @@ version=$(grep "^#?"  "$0" | cut -c 4-)
 # Usage info
 show_help() {
     cat << EOF
-    Usage: ${0##*/} [ -d WORKING_DIR ] [ -V ] [ -h ]
+    Usage: ${0##*/} [ -d WORKING_DIR ] [ -l LOGFILE ] [ -V ] [ -h ]
 
        -h display this help and exit
        -d WORKINGDIR  write the result to OUTFILE instead of standard output.
+       -l LOGFILE Name of the logfile
        -V print version of the script
 EOF
 }
@@ -26,13 +27,13 @@ while getopts "${optspec}" opt; do
         d )
             WORKING_DIR="${OPTARG}"
             ;;
-	l )
-	    LOGFILE="${OPTARG}"
-	    ;;
+	    l )
+            LOGFILE="${OPTARG}"
+	        ;;
         v )
             verbose=$((verbose+1))
             ;;
-        V ) 
+        V )
             echo "${version}"
             exit 1
             ;;
@@ -67,29 +68,34 @@ fi
 # Installation of system program needed and library
 # Done with docker
 
+echo "Start Paragait compilation"
+echo "Start Paragait compilation" >> $logfile
+
 ####################################################################
 # Parafem compilation and installation from source code (repository)
 ####################################################################
 
-./parafem.sh -d $WORKING_DIR -l $logfile  
+./parafem.sh -d $WORKING_DIR -l $logfile
 
 #######################################################
 # GaitSym compilation and installation from source code
 #######################################################
 
-./gaitsym.sh -d $WORKING_DIR -l $logfile  
+./gaitsym.sh -d $WORKING_DIR -l $logfile
 
 #######################################
 # Foam-dev Compilation and installation
 #######################################
 
-./foam-extend.sh -d $WORKING_DIR -l $logfile  
+./foam-extend.sh -d $WORKING_DIR -l $logfile
 
 #######################################
 # OpenFPCI Compilation and installation
 #######################################
 
-./openfpci.sh -d $WORKING_DIR -l $logfile  
+./openfpci.sh -d $WORKING_DIR -l $logfile
 
 #Print logfile for travis CI
 cat $logfile
+echo "End Paragait compilation"
+echo "End Paragait compilation" >> $logfile

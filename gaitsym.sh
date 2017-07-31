@@ -68,6 +68,9 @@ fi
 # GaitSym compilation and installation from source code
 #######################################################
 
+echo "Start Gaitsym compilation" 
+echo "Start Gaitsym compilation" >> $logfile
+
 cd $WORKING_DIR
 
 # Install lib and header in $HOME/Unix if not root (ie docker)
@@ -78,7 +81,7 @@ if [ ! "$(whoami)" == "root" ]; then
     mkdir -p $INSTALL_DEP/include
     export PATH=$PATH:$INSTALL_DEP/lib
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_DEP/lib
-    echo "Add the path ${INSTALL_DEP}/lib in you LD_LIBRARY_PATH variable"
+    echo "Add the path ${INSTALL_DEP}/lib in you LD_LIBRARY_PATH variable" >> $logfile
 else
     INSTALL_DEP=/usr/local
 fi

@@ -1,0 +1,26 @@
+#%Module1.0#####################################################################
+##
+## openmpi module file
+##
+################################################################################
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tAdds `openmpi-$version' to your PATH environment variable and necessary libraries"
+}
+
+set     version OPENMPI_VERSION
+
+module-whatis   "loads the necessary `openmpi-$version' library paths"
+
+eval set  [ array get env HOME ]
+
+set MPI_DIR $HOME/mpi/gcc/openmpi/$version
+
+setenv MPI_HOME $MPI_DIR
+
+prepend-path PATH $MPI_DIR/bin/
+prepend-path LD_LIBRARY_PATH $MPI_DIR/lib
+prepend-path MANPATH $MPI_DIR/share/man
+prepend-path CPATH $MPI_DIR/include
+
