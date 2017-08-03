@@ -6,6 +6,14 @@
 #? This is free software: you are free to change and redistribute it.
 #? There is NO WARRANTY, to the extent permitted by law.
 
+# Description of what the script is doing
+#
+# 1. Check that parafem is installed 
+#
+#
+#
+
+
 version=$(grep "^#?"  "$0" | cut -c 4-)
 
 # Usage info
@@ -14,25 +22,30 @@ show_help() {
     Usage: ${0##*/} [ -d WORKING_DIR ] [ -l LOGFILE ] [ -V ] [ -h ]
 
        -h display this help and exit
-       -d WORKINGDIR  write the result to OUTFILE instead of standard output.
+       -d WORKING_DIR Name of the working directory
+       -p PARAFEM_DIR Name of the directory where parafem is located
+       -l LOGFILE Name of the logfile (optional by default openfpci.log)
        -V print version of the script
 EOF
 }
 
-optspec="vVhd:l:"
+optspec="vVhd:p:l:"
 while getopts "${optspec}" opt; do
     case ${opt} in
         # for options with required arguments, an additional shift is required
         d )
             WORKING_DIR="${OPTARG}"
             ;;
-        l )
+	p )
+	    PARAFEM_DIR="${OPTARG}"
+	    ;;
+	l )
             LOGFILE="${OPTARG}"
             ;;
         v )
             verbose=$((verbose+1))
             ;;
-        V )
+        V ) 
             echo "${version}"
             exit 1
             ;;
@@ -48,6 +61,7 @@ if [ -z "${WORKING_DIR}" ]; then
     WORKING_DIR=`pwd`
     echo "Working directory: " ${WORKING_DIR}
 fi
+echo $WORKING_DIR
 
 if [ ! -d $WORKING_DIR ]; then
     mkdir $WORKING_DIR
@@ -64,29 +78,40 @@ if [ ! -f $logfile ]; then
     echo "working directory: " $WORKING_DIR > $logfile
 fi
 
+#READ common variable if present
+if [ ! -f version.sh ]; then
+    source version.sh
+else
+    PARAFEM_VERSION=5.0.3
+fi
 
-#READ common variable
-source version.sh
-
-echo "Start OpenFPCI compilation"
+echo "Start OpenFPCI compilation" 
 echo "Start OpenFPCI compilation" >> $logfile
 
+if [ -z "${PARAFEM_DIR}" ]; then
+    PARAFEM_DIR=$WORKING_DIR/parafem-code/parafem
+fi
+echo "PARAFEM_DIR="$PARAFEM_DIR >> $logfile
 
-PARAFEM_DIR=$WORKING_DIR/parafem-code/parafem
-
-if [ ! -d $PARAFEM_DIR ]; then
+if [ ! -f $PARAFEM_DIR/lib/libParaFEM_mpi.${PARAFEM_VERSION}.a ]; then
     echo "Parafem not present please install it"
     exit 1
+else
+    echo "Parafem lib used: "  $PARAFEM_DIR/lib/libParaFEM_mpi.${PARAFEM_VERSION}.a >> $logfile
 fi
 
 ############################################################
 # Compilation and Installation of OpenFPCI requirement (FSI)
 ############################################################
 
-# A Fluid Structure Interaction library which contains a framework
+# A Fluid Structure Interaction library which contains a framework 
 # for easy implementation of new structural models.
 # Installations step from:
 # https://openfoamwiki.net/index.php/Extend-bazaar/Toolkits/Fluid-structure_interaction#Install_on_foam-extend-4.0
+
+echo $WM_PROJECT_USER_DIR
+echo "FSI compilation"
+echo "FSI compilation" >> $logfile
 
 cd $HOME/foam/foam-extend-$FOAMEXTEND_VERSION
 source etc/bashrc
@@ -95,43 +120,79 @@ echo "Fsi Compilation and Installation" >> $logfile
 mkdir -p $WM_PROJECT_USER_DIR
 cd $WM_PROJECT_USER_DIR
 
+if [ $WORKING_DIR/Fsi_40.tar.gz ]; then
+    cp $WORKING_DIR/Fsi_40.tar.gz $WM_PROJECT_USER_DIR
+fi
+
 if [ ! -f Fsi_40.tar.gz ]; then
-    wget -c https://openfoamwiki.net/images/d/d6/Fsi_40.tar.gz >> $logfile 2>&1
+    echo "Download Fsi"
+    echo "Download Fsi" >> $logfile 2>&1
+    wget -c https://openfoamwiki.net/images/d/d6/Fsi_40.tar.gz >> $logfile 2>&1  
 fi
 
 if [ ! -d FluidSolidInteraction ]; then
-    tar -xzf Fsi_40.tar.gz >> $logfile 2>&1
+    echo "Uncompress Fsi"
+    echo "Uncompress Fsi" >> $logfile 2>&1
+    tar -xzf Fsi_40.tar.gz >> $logfile 2>&1  
 fi
 
 # build the Toolkit
-cd FluidSolidInteraction/src
-./Allwmake >> $logfile 2>&1
+cd $WM_PROJECT_USER_DIR/FluidSolidInteraction/src
+./Allwmake >> $logfile 2>&1  
 
 #######################################
 # OpenFPCI compilation and installation
 #######################################
 
-cd  $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/solidSolvers
+echo "OpenFPCI compilation"
+echo "OpenFPCI compilation" >> $logfile
 
+cd $WORKING_DIR
 if [ ! -d OpenFPCI ]; then
     git clone git://github.com/SPHewitt/OpenFPCI.git
-    ln -s OpenFPCI/paraFEM .
-    OPENMPI_LINK_FLAGS="`mpicc --showme:link`"
-    echo "solidSolvers/paraFEM/DyParaFEMSolid.C" > paraFEM.files
-    echo "solidSolvers/paraFEM/DyParaFEMSolidSolve.C" >> paraFEM.files
-    echo "solidSolvers/paraFEM/fortranRest.C" >> paraFEM.files
-    echo "" >> paraFEM.files
-    cat paraFEM.files $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/files > tmp.files
-    mv tmp.files $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/files
-
-    sed -i 's/EXE_LIBS = /EXE_LIBS = \\ \n    ..\/..\/fluidSolidInteraction\/solidSolvers\/paraFEM\/dyparafemsubroutines.o -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -lParaFEM_mpi.5.0.3  -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -larpack_linuxdesktop -lgfortran '"${OPENMPI_LINK_FLAGS//\//\\/}"' -lmpi/'  $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/options
-else
-    cd OpenFPCI
-    git pull >> $logfile 2>&1
 fi
 
+cp -r OpenFPCI/paraFEM $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/solidSolvers/
+
+cd  $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/solidSolvers
+
+OPENMPI_COMPILE_FLAGS="`mpif90 --showme:compile`"
+OPENMPI_LINK_FLAGS="`mpif90 --showme:link`"
+
+echo "solidSolvers/paraFEM/DyParaFEMSolid.C" > paraFEM.files
+echo "solidSolvers/paraFEM/DyParaFEMSolidSolve.C" >> paraFEM.files
+echo "solidSolvers/paraFEM/fortranRest.C" >> paraFEM.files
+echo "" >> paraFEM.files
+cat paraFEM.files $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/files > tmp.files
+mv tmp.files $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/files
+    
+# Modify the options files
+
+sed -i 's/EXE_INC = -std=c++11 \\/EXE_INC = -std=c++11 \\\n  '"${OPENMPI_COMPILE_FLAGS//\//\\/}"'\\/' $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/options
+
+sed -i 's/EXE_LIBS = /EXE_LIBS = \\\n    '"${WM_PROJECT_USER_DIR//\//\\/}"'\/FluidSolidInteraction\/src\/fluidSolidInteraction\/solidSolvers\/paraFEM\/dyparafemsubroutines.o \\\n    -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -lParaFEM_mpi.5.0.3  -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -larpack_linuxdesktop -lgfortran \\\n    '"${OPENMPI_LINK_FLAGS//\//\\/}"'/'  $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/Make/options
+
+sed -i 's/EXE_INC = -std=c++11 \\/EXE_INC = -std=c++11 \\\n  '"${OPENMPI_COMPILE_FLAGS//\//\\/}"'\\/' $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/solvers/fsiFoam/Make/options
+
+sed -i 's/EXE_LIBS = /EXE_LIBS = \\\n    '"${WM_PROJECT_USER_DIR//\//\\/}"'\/FluidSolidInteraction\/src\/fluidSolidInteraction\/solidSolvers\/paraFEM\/dyparafemsubroutines.o \\\n    -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -lParaFEM_mpi.5.0.3  -L\/'"${PARAFEM_DIR//\//\\/}"'\/lib -larpack_linuxdesktop -lgfortran \\\n    '"${OPENMPI_LINK_FLAGS//\//\\/}"'/' $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/solvers/fsiFoam/Make/options
+
 cd $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/fluidSolidInteraction/solidSolvers/paraFEM
-gfortran -v >> $logfile 2>&1
-gfortran -fcheck=all -c dyparafemsubroutines.f90 -o dyparafemsubroutines.o -I${PARAFEM_DIR}/include/mpi >> $logfile 2>&1
-cd ../../..
+echo "gfortran -fcheck=all -c dyparafemsubroutines.f90 -o dyparafemsubroutines.o -I${PARAFEM_DIR}/include/mpi" >> $logfile
+gfortran -fcheck=all -c dyparafemsubroutines.f90 -o dyparafemsubroutines.o -I${PARAFEM_DIR}/include/mpi >> $logfile 2>&1  
+cd $WM_PROJECT_USER_DIR/FluidSolidInteraction/src/
 ./Allwmake >> $logfile 2>&1
+
+# Fixed some dependencies as indicated in the wiki to run the tutorial (not tested!)
+# https://openfoamwiki.net/index.php/Extend-bazaar/Toolkits/Fluid-structure_interaction#Install_on_foam-extend-4.0
+
+#cd ..
+#find run -name options | while read item
+#do
+#  sed -i -e 's=$(WM_PROJECT_DIR)/applications/solvers/FSI=$(WM_PROJECT_USER_DIR)/FluidSolidInteractio#n/src=' $item
+#  sed -i -e 's=$(WM_THIRD_PARTY_DIR)/packages/eigen3=$(WM_PROJECT_USER_DIR)/FluidSolidInteraction/src#/ThirdParty/eigen3=' $item
+#done
+
+cd $WORKING_DIR
+
+echo "End of OpenFPCI compilation"
+echo "End of OpenFPCI compilation" >> $logfile

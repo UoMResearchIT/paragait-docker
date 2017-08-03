@@ -79,7 +79,12 @@ fi
 echo "Start FOAM-extend compilation"
 echo "Start FOAM-extend compilation" >> $logfile
 
-source version.sh
+#READ common variable if present
+if [ ! -f version.sh ]; then
+    source version.sh
+else
+    FOAMEXTEND_VERSION=4.0
+fi
 cd $WORKING_DIR
 
 PREFSFILE=etc/prefs.sh
@@ -126,10 +131,8 @@ if [ ! -d foam-extend-$FOAMEXTEND_VERSION ]; then
     #sed -i 's/#export PYTHON_DIR=path_to_system_installed_python/export PYTHON_DIR=\/usr/' $PREFSFILE
     #sed -i 's/#export PYTHON_BIN_DIR=$PYTHON_DIR\/bin/export PYTHON_BIN_DIR=$PYTHON_DIR\/bin/' $PREFSFILE
 
-    #Modifification of bashrc to use opnmpi from system (i.e. not version 1.8.8)
-
+    #Modifification of bashrc to use openmpi from system (i.e. not version 1.8.8)
     sed -i 's/export WM_THIRD_PARTY_USE_OPENMPI_188/#export WM_THIRD_PARTY_USE_OPENMPI_188/' etc/bashrc
-
     source etc/bashrc >> $logfile 2>&1
     ./Allwmake.firstInstall <<< "y" >> $logfile 2>&1
 else
@@ -155,3 +158,8 @@ if [ $RUNTEST ]; then
     ./Alltest >> $logfile 2>&1
     ./Allrun >> $logfile 2>&1
 fi
+
+cd $WORKING_DIR
+
+echo "End of Foam-extend compilation"
+echo "End of Foam-extend compilation" >> $logfile

@@ -115,3 +115,8 @@ if [ "$(whoami)" == "root" ]; then
 else
     mpirun ../bin/p121 p121_demo >> $logfile 2>&1
 fi
+
+cd $WORKING_DIR
+
+echo "End of Parafem compilation"
+echo "End of Parafem compilation" >> $logfile

@@ -173,3 +173,6 @@ fi
 
 # Clean directory
 cd $WORKING_DIR
+
+echo "End of GaitSym compilation"
+echo "End of GaitSym compilation" >> $logfile
