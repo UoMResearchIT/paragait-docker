@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir /Paragait
 WORKDIR /Paragait
 
-COPY paragait.sh parafem.sh gaitsym.sh foam-extend.sh openfpci.sh openmpi.patch version.sh ./
+COPY paragait.sh parafem.sh gaitsym.sh foam-extend.sh openfpci.sh version.sh ./
 RUN chmod +x paragait.sh parafem.sh gaitsym.sh foam-extend.sh openfpci.sh
 
 # This three line can be removed if you do not want to build and use OpenFPCI.

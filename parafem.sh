@@ -89,10 +89,6 @@ else
     svn update >> $logfile 2>&1  
 fi
 
-if [ -f openmpi.patch ]; then
-    patch -p0 -f < $WORKING_DIR/openmpi.patch >> $logfile 2>&1  
-fi
-
 # Compilation for linuxdesktop
 MACHINE=linuxdesktop ./make-parafem >> $logfile 2>&1   
 
