@@ -79,9 +79,10 @@ if [ ! -f $logfile ]; then
 fi
 
 #READ common variable if present
-if [ ! -f version.sh ]; then
+if [ -f version.sh ]; then
     source version.sh
 else
+    FOAMEXTEND_VERSION=4.0
     PARAFEM_VERSION=5.0.3
 fi
 
@@ -120,11 +121,9 @@ echo "Fsi Compilation and Installation" >> $logfile
 mkdir -p $WM_PROJECT_USER_DIR
 cd $WM_PROJECT_USER_DIR
 
-if [ $WORKING_DIR/Fsi_40.tar.gz ]; then
+if [ -f $WORKING_DIR/Fsi_40.tar.gz ]; then
     cp $WORKING_DIR/Fsi_40.tar.gz $WM_PROJECT_USER_DIR
-fi
-
-if [ ! -f Fsi_40.tar.gz ]; then
+else
     echo "Download Fsi"
     echo "Download Fsi" >> $logfile 2>&1
     wget -c https://openfoamwiki.net/images/d/d6/Fsi_40.tar.gz >> $logfile 2>&1  
@@ -137,6 +136,8 @@ if [ ! -d FluidSolidInteraction ]; then
 fi
 
 # build the Toolkit
+echo "Fsi compilation"
+echo "Fsi compilation" >> $logfile
 cd $WM_PROJECT_USER_DIR/FluidSolidInteraction/src
 ./Allwmake >> $logfile 2>&1  
 
