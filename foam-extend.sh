@@ -35,7 +35,7 @@ while getopts "${optspec}" opt; do
             LOGFILE="${OPTARG}"
             ;;
         t )
-            RUNTEST=1
+            RUNTEST=0
             ;;
         v )
             verbose=$((verbose+1))
