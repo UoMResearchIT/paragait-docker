@@ -1,0 +1,48 @@
+#%Module1.0#####################################################################
+##
+## gcc GCC_VERSION module file
+##
+
+proc ModulesHelp { } {
+        global version
+        global version_exe
+	global app
+
+        puts stderr "\tAdds `$app-$version' to your PATH environment variable and necessary libraries"
+}
+
+set     app gcc
+set     version GCC_VERSION
+set     version_exe GCC_EXE
+
+module-whatis   "loads the necessary `$app-$version' library paths"
+
+eval set  [ array get env HOME ]
+ 
+set BASEPATH $HOME/.local
+
+setenv GCCDIR $BASEPATH
+
+prepend-path PATH $BASEPATH/bin
+#prepend-path LD_LIBRARY_PATH $BASEPATH/lib:$BASEPATH/lib64
+#prepend-path MANPATH $BASEPATH/share/man
+#prepend-path INFOPATH $BASEPATH/share/info
+
+#prepend-path --delim " " CPPFLAGS " -I$BASEPATH/include"
+#prepend-path --delim " " CFLAGS " -I$BASEPATH/include"
+#prepend-path --delim " " LDFLAGS " -L$BASEPATH/lib -L$BASEPATH/lib64"
+
+setenv  cc      gcc-$version_exe
+setenv  cxx     g++-$version_exe
+setenv  f77     gfortran-$version_exe
+setenv  f90     gfortran-$version_exe
+setenv  f95     gfortran-$version_exe
+setenv  fc      gfortran-$version_exe
+
+setenv  CC      gcc-$version_exe
+setenv  CXX     g++-$version_exe
+setenv  F77     gfortran-$version_exe
+setenv  F90     gfortran-$version_exe
+setenv  F95     gfortran-$version_exe
+setenv  FC      gfortran-$version_exe
+
