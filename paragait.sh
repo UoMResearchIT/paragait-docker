@@ -81,7 +81,7 @@ echo "Start Paragait compilation" >> $logfile
 # GaitSym compilation and installation from source code
 #######################################################
 
-./gaitsym.sh -d $WORKING_DIR -l $logfile
+#./gaitsym.sh -d $WORKING_DIR -l $logfile
 
 #######################################
 # Foam-dev Compilation and installation
